@@ -445,22 +445,34 @@ async function handleUpload(e) {
   }
 
   els.btnUpload.disabled = true;
-  document.getElementById('upload-spinner').classList.remove('hidden');
-  document.getElementById('upload-btn-text').textContent = 'Uploading...';
+  const spinner = document.getElementById('upload-spinner');
+  const btnText = document.getElementById('upload-btn-text');
+  if (spinner) spinner.classList.remove('hidden');
+  if (btnText) btnText.textContent = 'Uploading...';
   els.uploadStatus.textContent = 'Preparing upload...';
 
   try {
     // Enhanced FormData with better file handling
     const formData = new FormData();
+    
+    // Add file first with proper naming
     formData.append('file', selectedFile, selectedFile.name);
+    
+    // Add all other parameters
     formData.append('action', 'upload');
     formData.append('filename', selectedFile.name);
-    formData.append('publish', els.chkPublish.checked.toString());
+    formData.append('publish', els.chkPublish.checked ? 'true' : 'false');
     formData.append('category', category);
     formData.append('displayName', els.displayName.value.trim());
     formData.append('tags', els.tags.value.trim());
     formData.append('sectionId', els.sectionId.value || '');
     formData.append('newSectionName', els.newSectionName.value.trim() || '');
+    
+    // Debug logging
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes)` : value);
+    }
 
     console.log('Uploading file:', {
       name: selectedFile.name,
@@ -501,8 +513,10 @@ async function handleUpload(e) {
     toast(`Upload failed: ${err.message}`, false);
   } finally {
     els.btnUpload.disabled = false;
-    document.getElementById('upload-spinner').classList.add('hidden');
-    document.getElementById('upload-btn-text').textContent = 'Upload Now';
+    const spinner = document.getElementById('upload-spinner');
+    const btnText = document.getElementById('upload-btn-text');
+    if (spinner) spinner.classList.add('hidden');
+    if (btnText) btnText.textContent = 'Upload Now';
     els.uploadStatus.textContent = '';
   }
 }
@@ -844,23 +858,42 @@ document.addEventListener('DOMContentLoaded', () => {
       const children = folderItem.querySelector('.folder-children');
       const icon = expandBtn.querySelector('svg');
       
-      expandBtn.dataset.expanded = !isExpanded;
-      children.classList.toggle('hidden', isExpanded);
-      icon.classList.toggle('rotate-90', !isExpanded);
+      if (children && icon) {
+        expandBtn.dataset.expanded = !isExpanded;
+        children.classList.toggle('hidden', isExpanded);
+        icon.classList.toggle('rotate-90', !isExpanded);
+      }
     } else if (folderItem) {
       // Select folder
+      e.stopPropagation();
+      
+      // Remove previous selection
       document.querySelectorAll('.folder-item > div').forEach(div => 
         div.classList.remove('bg-blue-100', 'dark:bg-blue-900/30')
       );
-      folderItem.firstElementChild.classList.add('bg-blue-100', 'dark:bg-blue-900/30');
       
+      // Add selection to clicked folder
+      const folderDiv = folderItem.querySelector('div');
+      if (folderDiv) {
+        folderDiv.classList.add('bg-blue-100', 'dark:bg-blue-900/30');
+      }
+      
+      // Update current selection
       currentFolderId = folderItem.dataset.folderId;
       currentCategory = folderItem.dataset.category;
       
-      // Update category button
-      document.querySelector('.category-btn.active-category')?.classList.remove('active-category');
-      document.querySelector(`[data-category="${currentCategory}"]`)?.classList.add('active-category');
+      console.log('Folder selected:', { currentFolderId, currentCategory });
       
+      // Update category button if needed
+      if (currentCategory) {
+        document.querySelector('.category-btn.active-category')?.classList.remove('active-category');
+        const categoryBtn = document.querySelector(`[data-category="${currentCategory}"]`);
+        if (categoryBtn) {
+          categoryBtn.classList.add('active-category');
+        }
+      }
+      
+      // Fetch files for selected folder
       fetchAndRenderFiles();
     }
   });
@@ -885,8 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   els.previewMove.addEventListener('click', () => {
     if (currentPreviewFile) {
-      // For now, show a simple alert. This could be enhanced with a folder picker modal
-      toast('Move functionality coming soon!', false);
+      showMoveFileModal(currentPreviewFile);
     }
   });
   
@@ -1035,12 +1067,76 @@ async function renameFile(fileId, newDisplayName) {
         els.previewTitle.textContent = newDisplayName;
         renderPreviewMetadata(currentPreviewFile);
       }
-      await fetchAndRenderFiles();
+      await Promise.all([fetchFolderTree(), fetchAndRenderFiles()]);
     } else {
       throw new Error(data.error);
     }
   } catch (err) {
     console.error('Rename error:', err);
     toast(`Rename failed: ${err.message}`, false);
+  }
+}
+
+/** Shows move file modal with folder selection */
+function showMoveFileModal(file) {
+  const targetFolders = [];
+  
+  // Get all available folders from the tree
+  const folderItems = document.querySelectorAll('.folder-item[data-folder-id]');
+  folderItems.forEach(item => {
+    const folderId = item.dataset.folderId;
+    const folderName = item.textContent.trim();
+    if (folderId && folderName) {
+      targetFolders.push({ id: folderId, name: folderName });
+    }
+  });
+  
+  if (targetFolders.length === 0) {
+    toast('No target folders available for moving', false);
+    return;
+  }
+  
+  // Create simple selection dialog
+  const options = targetFolders.map(folder => `${folder.name} (${folder.id})`).join('\n');
+  const selection = prompt(`Move "${file.displayName}" to which folder?\n\n${options}\n\nEnter folder name or ID:`);
+  
+  if (selection) {
+    const targetFolder = targetFolders.find(f => 
+      f.name.toLowerCase().includes(selection.toLowerCase()) || 
+      f.id === selection
+    );
+    
+    if (targetFolder) {
+      moveFile(file.id, targetFolder.id);
+    } else {
+      toast('Invalid folder selection', false);
+    }
+  }
+}
+
+/** Moves a file to a different folder */
+async function moveFile(fileId, targetFolderId) {
+  try {
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        action: 'moveFile', 
+        fileId, 
+        targetFolderId 
+      })
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+      toast('File moved successfully!', true);
+      hideFilePreview();
+      await Promise.all([fetchFolderTree(), fetchAndRenderFiles()]);
+    } else {
+      throw new Error(data.error);
+    }
+  } catch (err) {
+    console.error('Move error:', err);
+    toast(`Move failed: ${err.message}`, false);
   }
 }
