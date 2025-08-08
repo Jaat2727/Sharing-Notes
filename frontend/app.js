@@ -177,18 +177,21 @@ function renderFolderTree() {
   els.folderTree.innerHTML = html;
 }
 
-/** Recursively renders folder children. */
+/** Recursively renders folder children with files. */
 function renderFolderChildren(children, category) {
   if (!children || children.length === 0) return '';
   
   return children.map(folder => {
-    const isExpanded = false; // Start collapsed
+    const isExpanded = false;
+    const hasChildren = folder.children && folder.children.length > 0;
+    const hasFiles = folder.fileCount > 0;
+    
     return `
       <div class="folder-item" data-folder-id="${folder.id}" data-category="${category}">
         <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition ${
           currentFolderId === folder.id ? 'bg-blue-100 dark:bg-blue-900/30' : ''
         }">
-          ${folder.children.length > 0 ? `
+          ${hasChildren || hasFiles ? `
             <button class="expand-btn w-4 h-4 flex items-center justify-center" data-expanded="${isExpanded}">
               <svg class="h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -201,9 +204,12 @@ function renderFolderChildren(children, category) {
           <span class="text-sm">${folder.name}</span>
           <span class="text-xs text-slate-500 ml-auto">${folder.fileCount}</span>
         </div>
-        <div class="folder-children ml-6 ${isExpanded ? '' : 'hidden'}">
-          ${renderFolderChildren(folder.children, category)}
-        </div>
+        ${hasChildren || hasFiles ? `
+          <div class="folder-children ml-6 ${isExpanded ? '' : 'hidden'}">
+            ${hasChildren ? renderFolderChildren(folder.children, category) : ''}
+            ${hasFiles ? `<div class="text-xs text-slate-400 ml-4 p-1">📄 ${folder.fileCount} files</div>` : ''}
+          </div>
+        ` : ''}
       </div>
     `;
   }).join('');
@@ -304,24 +310,32 @@ function getGridClasses() {
   return 'grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
 }
 
-/** Fetches subfolders for the current category and populates the section dropdown. */
+/** Fetches sections for the selected category and populates the section dropdown. */
 async function fetchSections() {
-  // Hide section UI if "All" is selected or if "Publish" is unchecked
-  if (currentCategory === 'all' || !els.chkPublish.checked) {
+  const category = document.querySelector('.category-btn.active-category')?.dataset.category;
+  
+  // Only show sections if publishing and not in 'all' category
+  if (!els.chkPublish.checked || !category || category === 'all') {
     els.sectionContainer.classList.add('hidden');
     return;
   }
   
   els.sectionContainer.classList.remove('hidden');
-  els.sectionId.innerHTML = '<option value="">(Upload to Category Root)</option>';
-
+  
   try {
-    const res = await fetch(`${API_BASE}?action=getSections&category=${currentCategory}`);
+    const res = await fetch(`${API_BASE}?action=getFolderTree&category=${category}`);
     const data = await res.json();
-    if (data.success && data.sections) {
-      data.sections.forEach(sec => els.sectionId.add(new Option(sec.name, sec.id)));
+    if (data.success && data.tree[category]) {
+      const sections = data.tree[category].children || [];
+      els.sectionId.innerHTML = '<option value="">(Root of Category)</option>';
+      sections.forEach(section => {
+        els.sectionId.innerHTML += `<option value="${section.id}">${section.name}</option>`;
+      });
     }
-  } catch(err) { console.error('Could not fetch sections:', err); }
+  } catch (err) {
+    console.error('Error fetching sections:', err);
+    els.sectionContainer.classList.add('hidden');
+  }
 }
 
 /** Creates the HTML for a single file card with support for different view modes. */
@@ -1077,7 +1091,7 @@ async function renameFile(fileId, newDisplayName) {
   }
 }
 
-/** Shows move file modal with folder selection */
+/** Shows move file modal with interactive folder selection */
 function showMoveFileModal(file) {
   const targetFolders = [];
   
@@ -1085,7 +1099,7 @@ function showMoveFileModal(file) {
   const folderItems = document.querySelectorAll('.folder-item[data-folder-id]');
   folderItems.forEach(item => {
     const folderId = item.dataset.folderId;
-    const folderName = item.textContent.trim();
+    const folderName = item.querySelector('span')?.textContent?.trim();
     if (folderId && folderName) {
       targetFolders.push({ id: folderId, name: folderName });
     }
@@ -1096,20 +1110,28 @@ function showMoveFileModal(file) {
     return;
   }
   
-  // Create simple selection dialog
-  const options = targetFolders.map(folder => `${folder.name} (${folder.id})`).join('\n');
-  const selection = prompt(`Move "${file.displayName}" to which folder?\n\n${options}\n\nEnter folder name or ID:`);
+  // Create interactive selection dialog
+  const folderOptions = targetFolders.map((folder, index) => `${index + 1}. ${folder.name}`).join('\n');
+  const selection = prompt(`Move "${file.displayName}" to which folder?\n\n${folderOptions}\n\nEnter folder number (1-${targetFolders.length}) or folder name:`);
   
   if (selection) {
-    const targetFolder = targetFolders.find(f => 
-      f.name.toLowerCase().includes(selection.toLowerCase()) || 
-      f.id === selection
-    );
+    let targetFolder;
+    
+    // Check if it's a number
+    const folderIndex = parseInt(selection) - 1;
+    if (!isNaN(folderIndex) && folderIndex >= 0 && folderIndex < targetFolders.length) {
+      targetFolder = targetFolders[folderIndex];
+    } else {
+      // Search by name
+      targetFolder = targetFolders.find(f => 
+        f.name.toLowerCase().includes(selection.toLowerCase())
+      );
+    }
     
     if (targetFolder) {
       moveFile(file.id, targetFolder.id);
     } else {
-      toast('Invalid folder selection', false);
+      toast('Invalid folder selection. Please try again.', false);
     }
   }
 }
