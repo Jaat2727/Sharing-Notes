@@ -167,7 +167,13 @@
               <label for="chk-publish" class="text-sm text-slate-600 dark:text-slate-300">Publish immediately</label>
             </div>
             <div class="pt-2 flex items-center justify-between gap-4">
-                <button id="btn-upload" type="submit" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition">Upload Now</button>
+                <button id="btn-upload" type="submit" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                  <svg id="upload-spinner" class="hidden animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span id="upload-btn-text">Upload Now</span>
+                </button>
                 <div id="upload-status" class="text-sm text-slate-500 dark:text-slate-400 text-right"></div>
             </div>
         </div>
