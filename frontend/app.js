@@ -389,6 +389,23 @@ function handleFileSelection(e) {
     els.metadataPanel.classList.add('hidden');
     return;
   }
+  
+  // File validation
+  const maxSize = 100 * 1024 * 1024; // 100MB limit
+  if (file.size > maxSize) {
+    toast(`File too large! Maximum size is ${formatBytes(maxSize)}. Selected file is ${formatBytes(file.size)}.`, false);
+    resetUploadForm();
+    return;
+  }
+  
+  // Check for potentially problematic file types
+  const dangerousTypes = ['application/x-executable', 'application/x-msdownload', 'application/x-msdos-program'];
+  if (dangerousTypes.includes(file.type)) {
+    toast('This file type is not allowed for security reasons.', false);
+    resetUploadForm();
+    return;
+  }
+  
   selectedFile = file;
 
   els.uploadPrompt.classList.add('hidden');
@@ -428,34 +445,64 @@ async function handleUpload(e) {
   }
 
   els.btnUpload.disabled = true;
-  els.uploadStatus.textContent = 'Uploading...';
-
-  // FormData is crucial for sending files and parameters together
-  const formData = new FormData();
-  formData.append('file', selectedFile, selectedFile.name); // Send file with its original name
-  formData.append('action', 'upload');
-  formData.append('filename', selectedFile.name); // Original filename for backend
-  formData.append('publish', els.chkPublish.checked);
-  formData.append('category', category);
-  formData.append('displayName', els.displayName.value.trim());
-  formData.append('tags', els.tags.value.trim());
-  formData.append('sectionId', els.sectionId.value);
-  formData.append('newSectionName', els.newSectionName.value.trim());
+  document.getElementById('upload-spinner').classList.remove('hidden');
+  document.getElementById('upload-btn-text').textContent = 'Uploading...';
+  els.uploadStatus.textContent = 'Preparing upload...';
 
   try {
-    const res = await fetch(API_BASE, { method: 'POST', body: formData });
-    if (!res.ok) throw new Error(`Server error: ${res.statusText}`);
+    // Enhanced FormData with better file handling
+    const formData = new FormData();
+    formData.append('file', selectedFile, selectedFile.name);
+    formData.append('action', 'upload');
+    formData.append('filename', selectedFile.name);
+    formData.append('publish', els.chkPublish.checked.toString());
+    formData.append('category', category);
+    formData.append('displayName', els.displayName.value.trim());
+    formData.append('tags', els.tags.value.trim());
+    formData.append('sectionId', els.sectionId.value || '');
+    formData.append('newSectionName', els.newSectionName.value.trim() || '');
+
+    console.log('Uploading file:', {
+      name: selectedFile.name,
+      size: selectedFile.size,
+      type: selectedFile.type,
+      category: category,
+      publish: els.chkPublish.checked
+    });
+
+    els.uploadStatus.textContent = 'Uploading file...';
+
+    const res = await fetch(API_BASE, { 
+      method: 'POST', 
+      body: formData,
+      // Don't set Content-Type header - let browser set it with boundary for multipart/form-data
+    });
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Server error (${res.status}): ${errorText}`);
+    }
+    
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
     
+    els.uploadStatus.textContent = 'Upload complete! Refreshing...';
     toast('File uploaded successfully!', true);
     resetUploadForm();
-    await fetchAndRenderFiles();
+    
+    // Refresh the UI to show the new file
+    await Promise.all([
+      fetchFolderTree(),
+      fetchAndRenderFiles()
+    ]);
+    
   } catch (err) {
     console.error('Upload Error:', err);
     toast(`Upload failed: ${err.message}`, false);
-    els.btnUpload.disabled = false;
   } finally {
+    els.btnUpload.disabled = false;
+    document.getElementById('upload-spinner').classList.add('hidden');
+    document.getElementById('upload-btn-text').textContent = 'Upload Now';
     els.uploadStatus.textContent = '';
   }
 }
