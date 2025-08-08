@@ -21,14 +21,103 @@
     }
   </script>
   <style>
-    /* A few simple styles for better aesthetics and functionality */
-    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-    .active-category { background-color: #2563eb; color: white; }
-    .dark .active-category { background-color: #3b82f6; }
-    /* Prevent number input arrows */
-    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type="number"] { -moz-appearance: textfield; }
+    /* Enhanced styles for better aesthetics and functionality */
+    body { 
+      font-family: 'Inter', sans-serif; 
+      -webkit-font-smoothing: antialiased; 
+      -moz-osx-font-smoothing: grayscale; 
+    }
+    
+    .glass { 
+      backdrop-filter: blur(12px); 
+      -webkit-backdrop-filter: blur(12px); 
+    }
+    
+    .active-category { 
+      background-color: #2563eb !important; 
+      color: white !important; 
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .dark .active-category { 
+      background-color: #3b82f6 !important; 
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Enhanced input styling */
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    
+    input[type="number"] { 
+      -moz-appearance: textfield; 
+      appearance: textfield;
+    }
+    
+    /* Better input focus states */
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5);
+      border-color: rgb(59 130 246);
+    }
+    
+    /* Enhanced text input styling */
+    input[type="text"], input[type="email"], input[type="password"], 
+    input[type="search"], textarea, select {
+      transition: all 0.2s ease;
+      border-radius: 0.5rem;
+    }
+    
+    input[type="text"]:hover, input[type="email"]:hover, 
+    input[type="password"]:hover, input[type="search"]:hover, 
+    textarea:hover, select:hover {
+      border-color: rgb(148 163 184);
+    }
+    
+    /* Enhanced folder tree styles */
+    .folder-item:hover {
+      transform: translateX(2px);
+      transition: transform 0.2s ease;
+    }
+    
+    /* Upload progress animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .uploading {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Better scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.5);
+    }
+    
+    .dark ::-webkit-scrollbar-thumb {
+      background: rgba(71, 85, 105, 0.3);
+    }
+    
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: rgba(71, 85, 105, 0.5);
+    }
   </style>
 </head>
 <body class="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
