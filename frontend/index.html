@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- The 'dark' class will be toggled here by JS -->
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
@@ -10,27 +9,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Enable Tailwind's dark mode via class
     tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-        }
-      }
+      darkMode: 'class', // Enable class-based dark mode
+      theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } }
     }
   </script>
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     .active-category { background-color: #2563eb; color: white; }
     .dark .active-category { background-color: #3b82f6; }
   </style>
 </head>
-<body class="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<body class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 glass">
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 glass">
     <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="h-10 w-10 rounded-xl bg-blue-600/10 flex items-center justify-center">
@@ -38,74 +32,71 @@
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Notes Drive</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Public File Sharing Hub</p>
         </div>
       </div>
       <div class="flex items-center gap-4">
-        <button id="theme-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <button id="theme-toggle" class="h-9 w-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle theme">
           <svg id="theme-toggle-dark-icon" class="h-5 w-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
           <svg id="theme-toggle-light-icon" class="h-5 w-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
         </button>
-        <a href="#upload-section" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5-5 5 5M12 15V3"/></svg>
+        <a href="#upload-section" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
           <span>Upload</span>
         </a>
       </div>
     </div>
   </header>
 
+  <!-- MAIN CONTENT -->
   <main class="mx-auto max-w-7xl px-4 py-8 space-y-12">
     
-    <!-- Admin Panel (Hidden by default) -->
-    <section id="admin-panel" class="hidden rounded-2xl border-2 border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 p-6">
+    <!-- ADMIN PANEL (Hidden by default) -->
+    <section id="admin-panel" class="hidden rounded-2xl border-2 border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30 p-6">
       <h2 class="text-xl font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        Admin Panel
+        Admin Panel: Deletion Requests
       </h2>
-      <div id="deletion-requests-list" class="mt-4 space-y-2 text-sm"></div>
+      <div id="deletion-requests-list" class="mt-4 space-y-3 text-sm"></div>
     </section>
 
-    <!-- File Browser Section -->
+    <!-- FILE BROWSER -->
     <section>
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <!-- Search Input -->
         <div class="relative flex-grow">
-          <input type="search" id="search-input" placeholder="Search files in this category..." class="w-full md:w-64 pl-10 pr-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+          <input type="search" id="search-input" placeholder="Search current category..." class="w-full md:max-w-xs pl-10 pr-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
         </div>
-        <!-- Category Buttons -->
-        <div id="category-buttons" class="flex-shrink-0 flex items-center gap-2 rounded-lg bg-slate-200 dark:bg-slate-800 p-1">
-          <button data-category="documents" class="category-btn px-3 py-1.5 text-sm font-medium rounded-md transition">Documents</button>
-          <button data-category="images" class="category-btn px-3 py-1.5 text-sm font-medium rounded-md transition">Images</button>
-          <button data-category="videos" class="category-btn px-3 py-1.5 text-sm font-medium rounded-md transition">Videos</button>
+        <div id="category-buttons" class="flex-shrink-0 flex items-center gap-2 rounded-lg bg-slate-200 dark:bg-slate-800 p-1 self-start">
+          <button data-category="documents" class="category-btn px-3 py-1.5 text-sm font-medium rounded-md transition-colors">Documents</button>
+          <button data-category="images" class="category-btn px-3 py-1.5 text-sm font-medium rounded-md transition-colors">Images</button>
+          <button data-category="videos" class="category-btn px-3 py-1.5 text-sm font-medium rounded-md transition-colors">Videos</button>
         </div>
       </div>
-      <!-- File Grid -->
       <div id="grid" class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
     </section>
 
-    <!-- Upload Section -->
-    <section id="upload-section" class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+    <!-- UPLOAD SECTION -->
+    <section id="upload-section" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50 p-6 shadow-sm">
       <h2 class="text-xl font-bold">Upload New File</h2>
       <form id="form-upload" class="mt-4 space-y-4">
-        <label id="dropzone" class="group relative flex h-48 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-blue-500 transition-all">
+        <label id="dropzone" class="group relative flex h-48 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-transparent hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all">
           <input id="inp-file" type="file" class="hidden" />
-          <div class="pointer-events-none flex flex-col items-center text-center text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors">
+          <div class="pointer-events-none flex flex-col items-center text-center text-slate-500 dark:text-slate-400 group-hover:text-blue-600 transition-colors">
             <svg class="h-12 w-12 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5-5 5 5M12 15V3"/></svg>
-            <div class="font-semibold">Drag & drop a file or click to select</div>
+            <div class="font-semibold">Drag &amp; drop a file or click to select</div>
           </div>
         </label>
         
-        <div id="preview-panel" class="hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4 space-y-3">
+        <div id="preview-panel" class="hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4 space-y-4">
           <div id="preview-details"></div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-4">
               <button id="btn-upload" type="submit" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition">Upload Now</button>
               <div class="flex items-center gap-2 text-sm">
                 <input type="checkbox" id="chk-publish" class="h-4 w-4 rounded border-gray-300 dark:bg-slate-600 text-blue-600 focus:ring-blue-500">
-                <label for="chk-publish" class="text-slate-600 dark:text-slate-300">Publish directly to <strong id="publish-category-label" class="font-semibold">Documents</strong></label>
+                <label for="chk-publish" class="text-slate-600 dark:text-slate-300">Publish to <strong id="publish-category-label" class="font-semibold">Documents</strong></label>
               </div>
             </div>
             <div id="upload-status" class="text-sm text-slate-500 dark:text-slate-400"></div>
@@ -115,24 +106,25 @@
     </section>
   </main>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-5 right-5 w-80 rounded-lg px-4 py-3 text-sm text-white shadow-lg hidden transition-all"></div>
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 w-80 rounded-lg px-4 py-3 text-sm text-white shadow-lg opacity-0 translate-y-3 transition-all duration-300" role="alert"></div>
 
-  <!-- Deletion Request Modal -->
-  <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60">
-    <div class="w-full max-w-md rounded-lg bg-white dark:bg-slate-800 p-6 shadow-xl">
+  <!-- DELETION REQUEST MODAL -->
+  <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 transition-opacity">
+    <div class="w-full max-w-md rounded-lg bg-white dark:bg-slate-800 p-6 shadow-xl m-4">
       <h2 class="text-lg font-bold">Request File Deletion</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Provide a reason for deleting "<strong id="delete-file-name"></strong>". The admin will review this.</p>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Provide a reason for deleting "<strong id="delete-file-name"></strong>". The admin will review it.</p>
       <form id="delete-form" class="mt-4">
-        <textarea id="delete-reason" class="w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700" rows="3" placeholder="e.g., Outdated, duplicate..." required></textarea>
+        <textarea id="delete-reason" class="w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="e.g., Outdated content, duplicate file..." required></textarea>
         <div class="mt-4 flex justify-end gap-3">
-          <button type="button" id="cancel-delete-btn" class="rounded-md bg-slate-100 dark:bg-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600">Cancel</button>
-          <button type="submit" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Submit Request</button>
+          <button type="button" id="cancel-delete-btn" class="rounded-md bg-slate-100 dark:bg-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition">Cancel</button>
+          <button type="submit" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition">Submit Request</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- SCRIPT -->
   <script src="./app.js"></script>
 </body>
 </html>
