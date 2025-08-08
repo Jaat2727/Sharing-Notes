@@ -80,19 +80,35 @@ async function fetchFiles() {
 }
 
 function renderSelected(list) {
+  const panel = document.getElementById('preview-panel');
+  const listEl = document.getElementById('preview-list');
   if (!list || list.length === 0) {
-    els.selected.textContent = 'No files selected';
+    panel.classList.add('hidden');
     els.btnUpload.disabled = true;
     return;
   }
+  panel.classList.remove('hidden');
   els.btnUpload.disabled = false;
-  const items = Array.from(list).map(f => `<div class="flex items-center justify-between gap-3"><span class="truncate">${f.name}</span><span class="text-xs text-slate-500">${fmtBytes(f.size)}</span></div>`);
-  els.selected.innerHTML = items.join('');
+  listEl.innerHTML = Array.from(list).map(f => `
+    <div class="flex items-center justify-between gap-3 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+      <div class="flex flex-col">
+        <span class="text-sm font-medium text-slate-800 truncate max-w-xs">${f.name}</span>
+        <span class="text-xs text-slate-500">${fmtBytes(f.size)}</span>
+      </div>
+      <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+        <div class="progress-bar h-full bg-brand rounded-full w-0 transition-all duration-300" data-name="${f.name}"></div>
+      </div>
+    </div>`).join('');
 }
 
 function setUploadingState(isUploading) {
   els.btnUpload.disabled = isUploading;
   els.inputFile.disabled = isUploading;
+}
+
+function updateIndividualProgress(fileName, percent) {
+  const bar = document.querySelector(`.progress-bar[data-name="${fileName}"]`);
+  if (bar) bar.style.width = percent + '%';
 }
 
 function xhrUpload(file, publish) {
@@ -113,7 +129,7 @@ function xhrUpload(file, publish) {
       xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
           const pct = Math.round((e.loaded / e.total) * 100);
-          els.progress.style.width = pct + '%';
+          updateIndividualProgress(file.name, pct);
         }
       });
     }
@@ -129,15 +145,17 @@ async function uploadFile(ev) {
   const files = els.inputFile.files;
   if (!files || files.length === 0) return toast('Choose files to upload', false);
   setUploadingState(true);
-  els.uploadStatus.textContent = 'Uploading…';
+  els.uploadStatus.textContent = 'Starting uploads…';
   els.progress.style.width = '0%';
   try {
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i];
-      els.uploadStatus.textContent = `Uploading ${i + 1} / ${files.length}…`;
-      await xhrUpload(f, els.chkPublish.checked);
+    const total = files.length;
+    let done = 0;
+    for (const file of files) {
+      els.uploadStatus.textContent = `Uploading ${file.name} (${done + 1}/${total})…`;
+      await xhrUpload(file, els.chkPublish.checked);
+      done++;
     }
-    els.uploadStatus.textContent = 'Done';
+    els.uploadStatus.textContent = 'All uploads complete';
     toast('Uploaded successfully');
     els.inputFile.value = '';
     renderSelected([]);
