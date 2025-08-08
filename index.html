@@ -3,16 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notes Drive</title>
+  <title>Notes Drive - Loading...</title>
+
+  <!-- This meta tag instantly redirects the user to the main application -->
   <meta http-equiv="refresh" content="0; url=./frontend/index.html" />
+
+  <!-- This tells search engines the real location of your page -->
   <link rel="canonical" href="./frontend/index.html" />
-  <style>body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; padding: 2rem}</style>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8fafc;
+      color: #475569;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
+
+  <!-- This message is shown if JavaScript is disabled -->
   <noscript>
-    JavaScript is required. Please open <a href="./frontend/index.html">frontend/index.html</a>.
+    JavaScript is required to run this application. Please enable it and then
+    <a href="./frontend/index.html">click here to continue</a>.
   </noscript>
-  <p>Redirecting to <a href="./frontend/index.html">frontend/index.html</a>…</p>
-  <script>location.replace('./frontend/index.html');</script>
+
+  <!-- This message is shown briefly while the redirect happens -->
+  <p>
+    Loading Notes Drive... If you are not redirected,
+    <a href="./frontend/index.html">click here</a>.
+  </p>
+
+  <!-- This script is a fallback to ensure redirection happens -->
+  <script>
+    window.location.replace('./frontend/index.html');
+  </script>
+
 </body>
 </html>
